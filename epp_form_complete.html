@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Zero Interest EPP — Web Filler</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--accent:#007aff;--muted:#666}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
+main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
+h1{margin-top:0;font-size:1.25rem}
+.section{background:#fbfbfd;border:1px solid #eee;padding:12px;border-radius:8px;margin:12px 0}
+.section h2{margin:0 0 8px 0}
+label{display:block;margin:8px 0;font-size:0.95rem}
+input[type=text],input[type=email],input[type=number],input[type=tel],select{width:100%;padding:8px;border-radius:8px;border:1px solid #ddd;margin-top:6px;font-size:0.95rem}
+input[type=text]{text-transform:uppercase}
+.inline{display:inline-flex;align-items:center;margin-right:12px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.card-number-block .card-number-inputs{display:flex;gap:8px;margin-top:8px}
+.card-digit{width:80px;padding:8px;border-radius:8px;border:1px solid #ddd;text-align:center;font-size:1.05rem}
+.card-digit:focus{outline:2px solid rgba(0,122,255,0.15)}
+.small label{flex:1}
+.muted{color:var(--muted);font-size:0.85rem}
+button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+button.secondary{background:#999}
+.actions{display:flex;gap:12px;align-items:center}
+canvas{width:100%;height:150px;border-radius:8px;border:1px solid #ddd;background:#fff}
+.policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.policy{background:#fff;padding:10px;border-radius:8px;border:1px solid #eee}
+.policy h3{margin:0 0 8px 0;font-size:0.95rem}
+.tiny{font-size:0.85rem;color:var(--muted)}
+@media (max-width:720px){.policy-grid{grid-template-columns:1fr}.card-digit{width:60px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Zero Interest EPP — Web Filler</h1>
+
+  <!-- Section 1 -->
+  <section class="section" id="section1">
+    <h2>Section 1 — Cardholder Details</h2>
+    <label>Cardholder Name
+      <input id="Cardholder_Name" type="text" placeholder="AS PRINTED">
+    </label>
+    <label>Mailing Address Line 1
+      <input id="Cardholder_MailingAdd_Line1" type="text">
+    </label>
+    <label>Mailing Address Line 2
+      <input id="Cardholder_MailingAdd_Line2" type="text">
+    </label>
+    <div class="row">
+      <label style="flex:1">IC No. / NIRC
+        <input id="Cardholder_NIRC" type="text" placeholder="940101-01-1234">
+      </label>
+      <label style="flex:1">Home No.
+        <input id="Cardholder_HomeNo" type="text">
+      </label>
+      <label style="flex:1">Mobile No.
+        <input id="Cardholder_MobileNo" type="text">
+      </label>
+    </div>
+  </section>
+
+  <!-- Section 2 -->
+  <section class="section" id="section2">
+    <h2>Section 2 — Bank & Card Type</h2>
+
+    <label>Credit Card Number (UI: 4×4 boxes)
+      <div class="card-number-block">
+        <div class="card-number-inputs">
+          <input class="card-digit" id="CC_1" maxlength="4" inputmode="numeric" pattern="\d*">
+          <input class="card-digit" id="CC_2" maxlength="4" inputmode="numeric" pattern="\d*">
+          <input class="card-digit" id="CC_3" maxlength="4" inputmode="numeric" pattern="\d*">
+          <input class="card-digit" id="CC_4" maxlength="4" inputmode="numeric" pattern="\d*">
+        </div>
+        <small class="muted tiny">Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
+      </div>
+    </label>
+
+    <div class="row">
+      <label style="min-width:160px">Expiry Month
+        <select id="CC_MM">
+          <option value="">-- SELECT --</option>
+        </select>
+      </label>
+      <label style="min-width:160px">Expiry Year
+        <select id="CC_YYYY">
+          <option value="">-- SELECT --</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="row">
+      <label style="flex:1">CARD BANK
+        <select id="CC_Bank_Select">
+          <option value="">-- SELECT BANK --</option>
+        </select>
+      </label>
+
+      <label style="width:200px">CARD TYPE
+        <select id="CardType_Select">
+          <option value="">-- SELECT --</option>
+          <option value="Visa">VISA</option>
+          <option value="Master">MASTER</option>
+        </select>
+      </label>
+
+      <label style="width:220px">EPP TERM
+        <select id="EPPTerm_Select">
+          <option value="">-- SELECT --</option>
+          <option value="EPPTerm_6Months">6 MONTHS</option>
+          <option value="EPPTerm_12Months">12 MONTHS</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- Section 3 -->
+  <section class="section" id="section3">
+    <h2>Section 3 — Frequency After EPP</h2>
+    <label>FREQUENCY AFTER EPP ENDED
+      <select id="AfterEPP_Select">
+        <option value="">-- SELECT --</option>
+        <option value="AfterEPP_Annually">ANNUALLY</option>
+        <option value="AfterEPP_Halfyearly">HALF-YEARLY</option>
+        <option value="AfterEPP_Quarterly">QUARTERLY</option>
+        <option value="AfterEPP_Monthly">MONTHLY</option>
+      </select>
+    </label>
+  </section>
+
+  <!-- Section 4: Policies -->
+  <section class="section" id="section4">
+    <h2>Section 4 — Policy Details (up to 5)</h2>
+    <div id="policiesContainer" class="policy-grid"></div>
+    <div class="row">
+      <button id="addPolicy">+ Add Policy</button>
+      <small class="muted tiny">Up to 5 policies</small>
+    </div>
+  </section>
+
+  <!-- Section 5: Signatures & Witness -->
+  <section class="section" id="section5">
+    <h2>Section 5 — Signatures & Witness</h2>
+
+    <div class="row">
+      <label style="flex:1">SIGNED STATE
+        <select id="Signed_State">
+          <option value="">-- SELECT STATE --</option>
+          <option>SELANGOR</option>
+          <option>K. LUMPUR</option>
+          <option>JOHOR</option>
+          <option>KEDAH</option>
+          <option>KELANTAN</option>
+          <option>MELAKA</option>
+          <option>N. SEMBILAN</option>
+          <option>PAHANG</option>
+          <option>PERAK</option>
+          <option>PERLIS</option>
+          <option>PENANG</option>
+          <option>SABAH</option>
+          <option>SARAWAK</option>
+          <option>TERENGGANU</option>
+        </select>
+      </label>
+
+      <label>DAY
+        <select id="Signed_Day"><option value="">--</option></select>
+      </label>
+
+      <label>MONTH
+        <select id="Signed_Month"><option value="">--</option></select>
+      </label>
+
+      <label>YEAR
+        <select id="Signed_Year"><option value="">--</option></select>
+      </label>
+    </div>
+
+    <h3>Witness Details</h3>
+    <div class="row">
+      <label style="flex:1">Witness Name
+        <input id="Witness_Name" type="text">
+      </label>
+      <label style="flex:1">Witness NRIC
+        <input id="Witness_NRIC" type="text">
+      </label>
+    </div>
+
+    <h3>Witness Signature</h3>
+    <canvas id="sigWitness"></canvas>
+    <div class="row"><button id="clearSigWitness" class="secondary">Clear Witness Signature</button></div>
+
+    <h3>Cardholder Signature</h3>
+    <canvas id="sigCardholder"></canvas>
+    <div class="row"><button id="clearSigCardholder" class="secondary">Clear Cardholder Signature</button></div>
+  </section>
+
+  <!-- Actions -->
+  <section class="section actions">
+    <button id="generate">Generate PDF</button>
+    <button id="resetAll" class="secondary">Reset All</button>
+  </section>
+
+  <footer><small>Place <code>EPPForm_fillable.pdf</code> in the same folder as this HTML.</small></footer>
+</main>
+
+<!-- pdf-lib -->
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<script>
+/* ---------- Configuration ---------- */
+const PDF_FILENAME = "EPPForm_fillable.pdf";
+const STORAGE_KEY = "epp_form_auto_v1";
+const MAX_POLICIES = 5;
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+function up(v){ return v === undefined || v === null ? "" : String(v).toUpperCase(); }
+function safeSetText(form, name, text){ try { form.getTextField(name).setText(String(text || "")); } catch(e) {} }
+function safeCheck(form, name, checked){ try { const cb = form.getCheckBox(name); if (checked) cb.check(); else cb.uncheck(); } catch(e) {} }
+
+/* ---------- Populate selects (months/years/banks/signed day/month/year) ---------- */
+const monthNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+// expiry month
+monthNames.forEach((m, i)=> { const o = document.createElement("option"); o.value = String(i+1).padStart(2,'0'); o.textContent = m; $("CC_MM").appendChild(o); });
+// expiry year 2025..2050
+for(let y=2025;y<=2050;y++){ const o=document.createElement("option"); o.value=String(y); o.textContent=String(y); $("CC_YYYY").appendChild(o); }
+// signed day 1..31
+for(let d=1;d<=31;d++){ const o=document.createElement("option"); o.value=String(d).padStart(2,'0'); o.textContent=String(d); $("Signed_Day").appendChild(o); }
+// signed month as names (text)
+monthNames.forEach(m=>{ const o=document.createElement("option"); o.value=m; o.textContent=m; $("Signed_Month").appendChild(o); });
+// signed year 2025..2030
+for(let y=2025;y<=2030;y++){ const o=document.createElement("option"); o.value=String(y); o.textContent=String(y); $("Signed_Year").appendChild(o); }
+
+// bank list (values are the PDF checkbox field names)
+const banks = [
+  ["CC_Bank_UOB","UOB"],
+  ["CC_Bank_CIMB","CIMB"],
+  ["CC_Bank_HLB","HLB"],
+  ["CC_Bank_PBB","PBB"],
+  ["CC_Bank_MBB","MBB"],
+  ["CC_Bank_HSBC","HSBC"],
+  ["CC_Bank_Alliance","ALLIANCE"],
+  ["CC_Bank_StanChart","STANCHART"]
+];
+banks.forEach(b=>{ const o=document.createElement("option"); o.value=b[0]; o.textContent=b[1]; $("CC_Bank_Select").appendChild(o); });
+
+/* ---------- Auto uppercase visible + save to storage on change ---------- */
+document.addEventListener("input", (e)=>{
+  const t = e.target;
+  if(!t) return;
+  if(t.tagName === "INPUT" && t.type === "text"){
+    const pos = t.selectionStart;
+    t.value = t.value.toUpperCase();
+    try{ t.setSelectionRange(pos,pos);}catch(e){}
+  }
+  saveToStorageDebounced();
+});
+document.addEventListener("change", ()=> saveToStorageDebounced());
+
+/* ---------- Debounced storage ---------- */
+let saveTimer = null;
+function saveToStorageDebounced(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveToStorage, 300); }
+
+/* ---------- Save / Restore ---------- */
+function collectFormData(){
+  const d = {};
+  document.querySelectorAll("input, select").forEach(el=>{
+    if(!el.id) return;
+    if(el.tagName === "INPUT" && (el.type === "checkbox" || el.type === "radio")) d[el.id] = el.checked;
+    else d[el.id] = el.value;
+  });
+  d.policies = [];
+  document.querySelectorAll(".policy").forEach((p, idx)=>{
+    const i = idx+1;
+    d.policies.push({
+      pNo: $(`Paymentfor_PolicyNo${i}`)?.value || "",
+      owner: $(`Paymentfor_PolicyNo${i}_OwnerName`)?.value || "",
+      rel: $(`Paymentfor_PolicyNo${i}_Relationship`)?.value || "",
+      prem: $(`Paymentfor_PolicyNo${i}_FirstPremium`)?.value || ""
+    });
+  });
+  try {
+    d.sigWitness = sigWitness.canvas.toDataURL();
+    d.sigCard = sigCardholder.canvas.toDataURL();
+  } catch(e){ d.sigWitness=""; d.sigCard=""; }
+  return d;
+}
+function saveToStorage(){
+  try { const raw = collectFormData(); localStorage.setItem(STORAGE_KEY, JSON.stringify(raw)); } catch(e){ console.warn("save failed", e); }
+}
+function restoreFromStorage(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    Object.keys(d).forEach(k=>{
+      if(k === "policies" || k === "sigWitness" || k === "sigCard") return;
+      const el = $(k); if(!el) return;
+      if(el.tagName === "INPUT" && (el.type==="checkbox"||el.type==="radio")) el.checked = !!d[k]; else el.value = d[k];
+    });
+    policiesContainer.innerHTML = ""; policyCount = 0;
+    if(Array.isArray(d.policies) && d.policies.length){
+      d.policies.forEach((p, idx)=>{ addPolicy(); const i = idx+1; $(`Paymentfor_PolicyNo${i}`).value = p.pNo||""; $(`Paymentfor_PolicyNo${i}_OwnerName`).value = p.owner||""; $(`Paymentfor_PolicyNo${i}_Relationship`).value = p.rel||""; $(`Paymentfor_PolicyNo${i}_FirstPremium`).value = p.prem||""; });
+    } else { if(policyCount===0) addPolicy(); }
+    if(d.sigWitness) loadImageToCanvas(d.sigWitness, sigWitness.ctx, sigWitness.canvas);
+    if(d.sigCard) loadImageToCanvas(d.sigCard, sigCardholder.ctx, sigCardholder.canvas);
+  } catch(e){ console.warn("restore failed", e); }
+}
+
+/* ---------- Utility to draw image onto canvas ---------- */
+function loadImageToCanvas(dataUrl, ctx, canvas){
+  const img = new Image();
+  img.onload = function(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    ctx.drawImage(img, 0, 0, canvas.width/ratio, canvas.height/ratio);
+  };
+  img.src = dataUrl;
+}
+
+/* ---------- Policies dynamic (up to 5) ---------- */
+const policiesContainer = $("policiesContainer");
+const addPolicyBtn = $("addPolicy");
+let policyCount = 0;
+function createPolicyEntry(i){
+  const wrap = document.createElement("div"); wrap.className="policy"; wrap.dataset.index=i;
+  const h = document.createElement("h3"); h.textContent = `Policy ${i}`; wrap.appendChild(h);
+  const p1 = document.createElement("label"); p1.textContent="Policy No.";
+  const inp1 = document.createElement("input"); inp1.type="text"; inp1.id = `Paymentfor_PolicyNo${i}`; p1.appendChild(inp1); wrap.appendChild(p1);
+  const p2 = document.createElement("label"); p2.textContent="Owner Name";
+  const inp2 = document.createElement("input"); inp2.type="text"; inp2.id = `Paymentfor_PolicyNo${i}_OwnerName`; p2.appendChild(inp2); wrap.appendChild(p2);
+  const p3 = document.createElement("label"); p3.textContent="Relationship";
+  const sel = document.createElement("select"); sel.id = `Paymentfor_PolicyNo${i}_Relationship`;
+  ["","OWNSELF","SPOUSE","CHILDREN","PARENTS","GRANDPARENTS","SIBLINGS","EMPLOYER/EMPLOYEE"].forEach(o=>{
+    const opt = document.createElement("option"); opt.value = o; opt.textContent = o === "" ? "-- CHOOSE --" : o; sel.appendChild(opt);
+  });
+  p3.appendChild(sel); wrap.appendChild(p3);
+  const p4 = document.createElement("label"); p4.textContent="First Premium (RM)";
+  const inp4 = document.createElement("input"); inp4.type="text"; inp4.id = `Paymentfor_PolicyNo${i}_FirstPremium`; p4.appendChild(inp4); wrap.appendChild(p4);
+  if(i>1){
+    const rem = document.createElement("button"); rem.type="button"; rem.className="secondary"; rem.textContent="Remove";
+    rem.style.marginTop="8px"; rem.addEventListener("click", ()=>{ wrap.remove(); policyCount--; addPolicyBtn.disabled=false; reindexPolicies(); saveToStorage(); });
+    wrap.appendChild(rem);
+  }
+  return wrap;
+}
+function addPolicy(){ if(policyCount >= MAX_POLICIES) return; policyCount++; policiesContainer.appendChild(createPolicyEntry(policyCount)); if(policyCount >= MAX_POLICIES) addPolicyBtn.disabled = true; saveToStorage(); }
+function reindexPolicies(){ const nodes = Array.from(policiesContainer.querySelectorAll(".policy")); nodes.forEach((n, idx)=>{ const newIdx = idx+1; n.dataset.index = newIdx; n.querySelector("h3").textContent = `Policy ${newIdx}`; const pNo = n.querySelector('[id^="Paymentfor_PolicyNo"]:not([id$="_OwnerName"]):not([id$="_FirstPremium"])'); if(pNo) pNo.id = `Paymentfor_PolicyNo${newIdx}`; const owner = n.querySelector('[id$="_OwnerName"]'); if(owner) owner.id = `Paymentfor_PolicyNo${newIdx}_OwnerName`; const rel = n.querySelector('select'); if(rel) rel.id = `Paymentfor_PolicyNo${newIdx}_Relationship`; const prem = n.querySelector('[id$="_FirstPremium"]'); if(prem) prem.id = `Paymentfor_PolicyNo${newIdx}_FirstPremium`; }); addPolicyBtn.disabled = policyCount >= MAX_POLICIES; }
+addPolicyBtn.addEventListener("click", addPolicy);
+addPolicy();
+
+/* ---------- Card number 4x behavior ---------- */
+const ccInputs = [ $("CC_1"), $("CC_2"), $("CC_3"), $("CC_4") ];
+ccInputs.forEach((el, idx)=>{
+  el.addEventListener("input", ()=>{
+    el.value = el.value.replace(/\D/g,'').slice(0,4);
+    if(el.value.length === 4 && idx < ccInputs.length-1) ccInputs[idx+1].focus();
+    saveToStorageDebounced();
+  });
+  el.addEventListener("keydown", (e)=>{ if(e.key === "Backspace" && el.value.length === 0 && idx>0) ccInputs[idx-1].focus(); });
+  el.addEventListener("paste", (e)=>{
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const digits = paste.replace(/\D/g,'').slice(0,16).padEnd(16,' ');
+    for(let i=0;i<4;i++) ccInputs[i].value = digits.slice(i*4,i*4+4).trim();
+    for(let i=0;i<4;i++){ if(ccInputs[i].value.length < 4){ ccInputs[i].focus(); break;} if(i===3) ccInputs[3].focus(); }
+    saveToStorageDebounced();
+  });
+});
+
+/* ---------- Signature canvas setup (two canvases) ---------- */
+function setupCanvas(id, clearBtnId){
+  const canvas = $(id); const ctx = canvas.getContext('2d');
+  function resize(){ const ratio = Math.max(window.devicePixelRatio||1,1); canvas.width = canvas.offsetWidth * ratio; canvas.height = 150 * ratio; canvas.style.height = "150px"; ctx.setTransform(1,0,0,1,0,0); ctx.scale(ratio, ratio); ctx.lineWidth=2; ctx.lineCap="round"; ctx.strokeStyle="#000"; }
+  resize(); window.addEventListener("resize", resize);
+  let drawing=false;
+  function pos(e){ const rect = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return {x: cx-rect.left, y: cy-rect.top}; }
+  canvas.addEventListener("mousedown",(e)=>{ drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+  canvas.addEventListener("mousemove",(e)=>{ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
+  canvas.addEventListener("mouseup", ()=>{ drawing=false; saveToStorageDebounced(); });
+  canvas.addEventListener("mouseout", ()=> drawing=false);
+  canvas.addEventListener("touchstart",(e)=>{ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); },{passive:false});
+  canvas.addEventListener("touchmove",(e)=>{ e.preventDefault(); if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); },{passive:false});
+  canvas.addEventListener("touchend", ()=>{ drawing=false; saveToStorageDebounced(); });
+  $(clearBtnId).addEventListener("click", ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); saveToStorageDebounced(); });
+  return { canvas, ctx };
+}
+const sigWitness = setupCanvas("sigWitness", "clearSigWitness");
+const sigCardholder = setupCanvas("sigCardholder", "clearSigCardholder");
+
+/* ---------- Canvas blank detection ---------- */
+function canvasIsBlank(ctx, canvas){
+  try {
+    const w = Math.min(10, canvas.width);
+    const data = ctx.getImageData(0,0,w,1).data;
+    for(let i=0;i<data.length;i+=4){
+      if(!(data[i]===255 && data[i+1]===255 && data[i+2]===255)) return false;
+    }
+  } catch(e){ return false; }
+  return true;
+}
+
+/* ---------- Save/Restore on load ---------- */
+window.addEventListener("load", ()=>{ restoreFromStorage(); });
+
+/* ---------- Fill PDF (pdf-lib) ---------- */
+async function fillPDF(){
+  try {
+    $("generate").disabled = true;
+    const res = await fetch(PDF_FILENAME);
+    if(!res.ok) throw new Error("Cannot load PDF: " + PDF_FILENAME);
+    const bytes = await res.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
+
+    // Section 1
+    safeSetText(form, "Cardholder_Name", up($("Cardholder_Name").value));
+    safeSetText(form, "Cardholder_MailingAdd_Line1", up($("Cardholder_MailingAdd_Line1").value));
+    safeSetText(form, "Cardholder_MailingAdd_Line2", up($("Cardholder_MailingAdd_Line2").value));
+    safeSetText(form, "Cardholder_NIRC", up($("Cardholder_NIRC").value));
+    safeSetText(form, "Cardholder_HomeNo", up($("Cardholder_HomeNo").value));
+    safeSetText(form, "Cardholder_MobileNo", up($("Cardholder_MobileNo").value));
+
+    // Card number join -> CC_Number
+    const ccJoined = ccInputs.map(i=> (i.value || "").padEnd(4,' ').slice(0,4)).join('').replace(/\s/g,'');
+    safeSetText(form, "CC_Number", ccJoined);
+
+    // CC expiry mm/yy from selects -> format MM/YY
+    const mm = $("CC_MM").value || "";
+    const yyyy = $("CC_YYYY").value || "";
+    const yy = yyyy ? yyyy.slice(-2) : "";
+    safeSetText(form, "CC_Expirydate", (mm && yy) ? `${mm}/${yy}` : "");
+
+    // Bank: clear all bank checkboxes then check chosen
+    const bankFields = ["CC_Bank_UOB","CC_Bank_CIMB","CC_Bank_HLB","CC_Bank_PBB","CC_Bank_MBB","CC_Bank_HSBC","CC_Bank_Alliance","CC_Bank_StanChart"];
+    bankFields.forEach(b => safeCheck(form, b, false));
+    const bankSel = $("CC_Bank_Select").value;
+    if(bankSel) safeCheck(form, bankSel, true);
+
+    // Card type (Visa/Master)
+    safeCheck(form, "Visa", false); safeCheck(form, "Master", false);
+    const ct = $("CardType_Select").value; if(ct) safeCheck(form, ct, true);
+
+    // EPP Term
+    safeCheck(form, "EPPTerm_6Months", false); safeCheck(form, "EPPTerm_12Months", false);
+    const term = $("EPPTerm_Select").value; if(term) safeCheck(form, term, true);
+
+    // After EPP frequency
+    ["AfterEPP_Annually","AfterEPP_Halfyearly","AfterEPP_Quarterly","AfterEPP_Monthly"].forEach(a=>safeCheck(form,a,false));
+    const afterSel = $("AfterEPP_Select").value; if(afterSel) safeCheck(form, afterSel, true);
+
+    // Policies: iterate existing rows
+    const rows = Array.from(policiesContainer.querySelectorAll(".policy"));
+    rows.forEach((row, idx)=> {
+      const i = idx+1;
+      safeSetText(form, `Paymentfor_PolicyNo${i}`, up($( `Paymentfor_PolicyNo${i}` )?.value || ""));
+      safeSetText(form, `Paymentfor_PolicyNo${i}_OwnerName`, up($( `Paymentfor_PolicyNo${i}_OwnerName` )?.value || ""));
+      safeSetText(form, `Paymentfor_PolicyNo${i}_Relationship`, up($( `Paymentfor_PolicyNo${i}_Relationship` )?.value || ""));
+      safeSetText(form, `Paymentfor_PolicyNo${i}_FirstPremium`, $( `Paymentfor_PolicyNo${i}_FirstPremium` )?.value || "");
+    });
+    for(let i = rows.length+1; i<=MAX_POLICIES; i++){
+      safeSetText(form, `Paymentfor_PolicyNo${i}`, "");
+      safeSetText(form, `Paymentfor_PolicyNo${i}_OwnerName`, "");
+      safeSetText(form, `Paymentfor_PolicyNo${i}_Relationship`, "");
+      safeSetText(form, `Paymentfor_PolicyNo${i}_FirstPremium`, "");
+    }
+
+    // Signing info & witness
+    safeSetText(form, "Signed_State", up($("Signed_State").value));
+    safeSetText(form, "Signed_Month", up($("Signed_Month").value));
+    safeSetText(form, "Signed_Day", up($("Signed_Day").value));
+    safeSetText(form, "Signed_Year", up($("Signed_Year").value));
+    safeSetText(form, "Witness_Name", up($("Witness_Name").value));
+    safeSetText(form, "Witness_NRIC", up($("Witness_NRIC").value));
+
+    // Embed signatures (only if drawn)
+    const pages = pdfDoc.getPages();
+    async function embedCanvas(canvasObj, x,y,width=160,height=50){
+      try {
+        if(canvasIsBlank(canvasObj.ctx, canvasObj.canvas)) return;
+        const dataUrl = canvasObj.canvas.toDataURL("image/png");
+        const bytes = await fetch(dataUrl).then(r=>r.arrayBuffer());
+        const img = await pdfDoc.embedPng(bytes);
+        const pageIndex = Math.min(1, pages.length-1);
+        const page = pages[pageIndex];
+        page.drawImage(img, { x, y, width, height });
+      } catch(e){ console.warn("embed signature failed", e); }
+    }
+    await embedCanvas(sigWitness, 120, 110, 160, 50);
+    await embedCanvas(sigCardholder, 360, 110, 160, 50);
+
+    // Save & download with filename based on Paymentfor_PolicyNo1
+    const policy1 = $(`Paymentfor_PolicyNo1`)?.value?.trim();
+    const safeName = policy1 ? `EPP_${policy1.replace(/[^A-Za-z0-9-_]/g,'')}.pdf` : "EPPForm_Filled.pdf";
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = safeName; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2500);
+
+    saveToStorage();
+    alert("PDF generated and downloaded as " + safeName + ". Your data is saved locally.");
+  } catch (err) {
+    console.error(err);
+    alert("PDF generation failed: " + (err && err.message ? err.message : err));
+  } finally {
+    $("generate").disabled = false;
+  }
+}
+$("generate").addEventListener("click", fillPDF);
+
+/* ---------- Reset All ---------- */
+$("resetAll").addEventListener("click", ()=>{
+  if(!confirm("Reset all fields and clear saved data?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.querySelectorAll("input, select").forEach(el=>{
+    if(el.tagName==="INPUT" && (el.type==="checkbox"||el.type==="radio")) el.checked=false;
+    else el.value="";
+  });
+  policiesContainer.innerHTML = ""; policyCount = 0; addPolicy();
+  sigCardholder.ctx.clearRect(0,0,sigCardholder.canvas.width,sigCardholder.canvas.height);
+  sigWitness.ctx.clearRect(0,0,sigWitness.canvas.width,sigWitness.canvas.height);
+});
+
+/* ---------- Final: storage wrapper functions ---------- */
+let saveTimer=null;
+function saveToStorageDebounced(){ clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ try{ const data=collectFormData(); localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){console.warn("save error",e);} }, 200); }
+function saveToStorage(){ saveToStorageDebounced(); }
+function collectFormData(){
+  const obj={};
+  document.querySelectorAll("input, select").forEach(el=>{ if(el.id) obj[el.id] = (el.type==="checkbox"||el.type==="radio")? el.checked : el.value; });
+  obj.policies = []; document.querySelectorAll(".policy").forEach((p,idx)=>{ const i=idx+1; obj.policies.push({ pNo: $(`Paymentfor_PolicyNo${i}`)?.value||"", owner: $(`Paymentfor_PolicyNo${i}_OwnerName` )?.value||"", rel: $(`Paymentfor_PolicyNo${i}_Relationship` )?.value||"", prem: $(`Paymentfor_PolicyNo${i}_FirstPremium` )?.value||"" }); });
+  try{ obj.sigWitness = sigWitness.canvas.toDataURL(); obj.sigCard = sigCardholder.canvas.toDataURL(); }catch(e){ obj.sigWitness=""; obj.sigCard=""; }
+  return obj;
+}
+function restoreFromStorage(){ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return; try{ const d = JSON.parse(raw); Object.keys(d).forEach(k=>{ if(k==="policies"||k==="sigWitness"||k==="sigCard") return; const el=$(k); if(!el) return; if(el.tagName==="INPUT"&&(el.type==="checkbox"||el.type==="radio")) el.checked = !!d[k]; else el.value = d[k]; }); policiesContainer.innerHTML=""; policyCount=0; if(Array.isArray(d.policies)&&d.policies.length){ d.policies.forEach((p,idx)=>{ addPolicy(); const i=idx+1; $(`Paymentfor_PolicyNo${i}`).value=p.pNo||""; $(`Paymentfor_PolicyNo${i}_OwnerName`).value=p.owner||""; $(`Paymentfor_PolicyNo${i}_Relationship`).value=p.rel||""; $(`Paymentfor_PolicyNo${i}_FirstPremium`).value=p.prem||""; }); } else { if(policyCount===0) addPolicy(); } if(d.sigWitness) loadImageToCanvas(d.sigWitness, sigWitness.ctx, sigWitness.canvas); if(d.sigCard) loadImageToCanvas(d.sigCard, sigCardholder.ctx, sigCardholder.canvas); }catch(e){console.warn("restore error",e);} }
+restoreFromStorage();
+
+</script>
+</body>
+</html>
