@@ -539,11 +539,15 @@ async function fillPDF(){
     const ccCombined = ccDigits.map(d=>d.value.padEnd(4,' ').slice(0,4)).join('').slice(0,16).replace(/\s/g,'');
     safeSetText(form, "CC_Number", ccCombined);
 
-    // expiry
-    const mm = (ccMM.value || "").padStart(2,'0').slice(0,2);
-    const yy = (ccYY.value || "").padStart(2,'0').slice(0,2);
-    const expiry = (mm.trim() === "" && yy.trim() === "") ? "" : `${mm}/${yy}`;
-    safeSetText(form, "CC_Expirydate", expiry);
+    // expiry month and year as full text, e.g. "JANUARY 2026"
+const monthEl = document.getElementById("CC_MM");
+const yearEl = document.getElementById("CC_YY");
+
+const month = monthEl ? monthEl.value : "";
+const year = yearEl ? yearEl.value : "";
+
+const expiry = (month && year) ? `${month.toUpperCase()} ${year}` : "";
+safeSetText(form, "CC_Expirydate", expiry);
 
     // Banks (checkboxes)
     const bankFields = ["CC_Bank_UOB","CC_Bank_CIMB","CC_Bank_HLB","CC_Bank_PBB","CC_Bank_MBB","CC_Bank_HSBC","CC_Bank_Alliance","CC_Bank_StanChart"];
