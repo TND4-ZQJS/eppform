@@ -103,12 +103,32 @@
         </div>
       </label>
 
-      <label style="min-width:140px">Expiry MM
-        <input id="CC_MM" maxlength="2" inputmode="numeric" placeholder="MM">
-      </label>
-      <label style="min-width:140px">Expiry YY
-        <input id="CC_YY" maxlength="2" inputmode="numeric" placeholder="YY">
-      </label>
+      <label for="expiryMonth">Expiry Month</label>
+<select id="expiryMonth" name="expiryMonth">
+  <option value="">-- Select Month --</option>
+  <option>January</option>
+  <option>February</option>
+  <option>March</option>
+  <option>April</option>
+  <option>May</option>
+  <option>June</option>
+  <option>July</option>
+  <option>August</option>
+  <option>September</option>
+  <option>October</option>
+  <option>November</option>
+  <option>December</option>
+</select>
+
+<label for="expiryYear">Expiry Year</label>
+<select id="expiryYear" name="expiryYear">
+  <option value="">-- Select Year --</option>
+  <script>
+    for (let year = 2025; year <= 2040; year++) {
+      document.write(`<option>${year}</option>`);
+    }
+  </script>
+</select>
     </div>
 
     <div class="row">
@@ -342,9 +362,14 @@ ccDigits.forEach((el, idx)=>{
     for(let i=0;i<4;i++){ if(ccDigits[i].value.length<4){ ccDigits[i].focus(); break; } if(i===3) ccDigits[3].focus(); }
   });
 });
-const ccMM = $("CC_MM"), ccYY = $("CC_YY");
-ccMM.addEventListener("input", ()=>{ ccMM.value = ccMM.value.replace(/\D/g,'').slice(0,2); if(ccMM.value.length===2) ccYY.focus(); });
-ccYY.addEventListener("input", ()=>{ ccYY.value = ccYY.value.replace(/\D/g,'').slice(0,2); });
+const expiryMonth = document.getElementById("expiryMonth").value;
+const expiryYear = document.getElementById("expiryYear").value;
+
+// Combine them into one string
+const expiryFull = `${expiryMonth} ${expiryYear}`;
+
+// Set into PDF single field
+form.getTextField("ExpiryDate").setText(expiryFull);
 
 /* ---------- Signature modal (shared) ---------- */
 const sigModal = $("sigModal"), sigCanvas = $("sigCanvas"), sigModalContent = $("sigModalContent");
