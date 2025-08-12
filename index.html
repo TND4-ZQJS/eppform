@@ -61,7 +61,6 @@
 <main>
   <h1>Zero Interest EPP — Web Filler (Merged UI)</h1>
 
-  <!-- Section 1 - Cardholder Details (add section1 class) -->
   <section class="section section1" id="section1">
     <h2>Section 1 — Cardholder Details</h2>
     <label>Cardholder Name
@@ -86,7 +85,6 @@
     </div>
   </section>
 
-  <!-- Section 2 - Bank & Card Type -->
   <section class="section" id="section2">
     <h2>Section 2 — Bank & Card Type</h2>
 
@@ -103,11 +101,27 @@
         </div>
       </label>
 
-      <label style="min-width:140px">Expiry MM
-        <input id="CC_MM" maxlength="2" inputmode="numeric" placeholder="MM">
+      <label style="min-width:140px">Expiry Month
+        <select id="CC_MM_Select">
+          <option value="">-- Month --</option>
+          <option value="01">01 - JAN</option>
+          <option value="02">02 - FEB</option>
+          <option value="03">03 - MAR</option>
+          <option value="04">04 - APR</option>
+          <option value="05">05 - MAY</option>
+          <option value="06">06 - JUN</option>
+          <option value="07">07 - JUL</option>
+          <option value="08">08 - AUG</option>
+          <option value="09">09 - SEP</option>
+          <option value="10">10 - OCT</option>
+          <option value="11">11 - NOV</option>
+          <option value="12">12 - DEC</option>
+        </select>
       </label>
-      <label style="min-width:140px">Expiry YY
-        <input id="CC_YY" maxlength="2" inputmode="numeric" placeholder="YY">
+      <label style="min-width:140px">Expiry Year
+        <select id="CC_YY_Select">
+          <option value="">-- Year --</option>
+        </select>
       </label>
     </div>
 
@@ -148,7 +162,6 @@
 
   </section>
 
-  <!-- Section 3 - After EPP frequency -->
   <section class="section" id="section3">
     <h2>Section 3 — Frequency After EPP</h2>
     <label>
@@ -163,7 +176,6 @@
     </label>
   </section>
 
-  <!-- Section 4 - Policy Details (dynamic up to 5) -->
   <section class="section" id="section4">
     <h2>Section 4 — Policy Details (up to 5)</h2>
     <div id="policiesContainer" class="policy-grid"></div>
@@ -173,7 +185,6 @@
     </div>
   </section>
 
-  <!-- Section 5 - Signatures & Witness (add section5 class) -->
   <section class="section section5" id="section5">
     <h2>Section 5 — Signatures & Witness</h2>
 
@@ -234,7 +245,6 @@
     </div>
   </section>
 
-  <!-- Actions -->
   <section class="section actions">
     <button id="generate">Generate PDF</button>
     <button id="resetAll" class="secondary">Reset All</button>
@@ -245,7 +255,6 @@
   </footer>
 </main>
 
-<!-- Signature modal (shared) -->
 <div id="sigModal">
   <div id="sigModalContent">
     <canvas id="sigCanvas"></canvas>
@@ -259,7 +268,6 @@
 
 <div id="saveStatus">Saved</div>
 
-<!-- pdf-lib -->
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <script>
@@ -329,7 +337,7 @@ function reorganizePolicyIndices(){
 addPolicyBtn.addEventListener("click", addPolicy);
 addPolicy(); // start with 1
 
-/* ---------- Credit card inputs ---------- */
+/* ---------- Credit card number inputs (unchanged) ---------- */
 const ccDigits = [ $("CC_1"), $("CC_2"), $("CC_3"), $("CC_4") ];
 ccDigits.forEach((el, idx)=>{
   el.addEventListener("input", ()=>{ el.value = el.value.replace(/\D/g,'').slice(0,4); if(el.value.length===4 && idx<ccDigits.length-1) ccDigits[idx+1].focus(); });
@@ -342,9 +350,18 @@ ccDigits.forEach((el, idx)=>{
     for(let i=0;i<4;i++){ if(ccDigits[i].value.length<4){ ccDigits[i].focus(); break; } if(i===3) ccDigits[3].focus(); }
   });
 });
-const ccMM = $("CC_MM"), ccYY = $("CC_YY");
-ccMM.addEventListener("input", ()=>{ ccMM.value = ccMM.value.replace(/\D/g,'').slice(0,2); if(ccMM.value.length===2) ccYY.focus(); });
-ccYY.addEventListener("input", ()=>{ ccYY.value = ccYY.value.replace(/\D/g,'').slice(0,2); });
+
+/* ---------- NEW: Card expiry year dropdown population ---------- */
+(function populateCCYearSelector() {
+  const yearSel = document.getElementById("CC_YY_Select");
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear; y <= currentYear + 10; y++) {
+    const option = document.createElement("option");
+    option.value = String(y).slice(-2);
+    option.textContent = y;
+    yearSel.appendChild(option);
+  }
+})();
 
 /* ---------- Signature modal (shared) ---------- */
 const sigModal = $("sigModal"), sigCanvas = $("sigCanvas"), sigModalContent = $("sigModalContent");
@@ -511,10 +528,16 @@ async function fillPDF(){
     const ccCombined = ccDigits.map(d=>d.value.padEnd(4,' ').slice(0,4)).join('').slice(0,16).replace(/\s/g,'');
     safeSetText(form, "CC_Number", ccCombined);
 
-    // expiry
-    const mm = (ccMM.value || "").padStart(2,'0').slice(0,2);
-    const yy = (ccYY.value || "").padStart(2,'0').slice(0,2);
-    const expiry = (mm.trim() === "" && yy.trim() === "") ? "" : `${mm}/${yy}`;
+    // UPDATED PDF-FILL LOGIC FOR CARD EXPIRY
+    const mm = document.getElementById("CC_MM_Select").value;
+    const yy = document.getElementById("CC_YY_Select").value;
+    let expiry = "";
+    if (mm && yy) {
+      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      const monthIndex = parseInt(mm, 10) - 1;
+      const fullYear = `20${yy}`;
+      expiry = `${monthNames[monthIndex]} ${fullYear}`;
+    }
     safeSetText(form, "CC_Expirydate", expiry);
 
     // Banks (checkboxes)
