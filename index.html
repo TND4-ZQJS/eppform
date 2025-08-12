@@ -178,9 +178,25 @@
     <h2>Section 5 — Signatures & Witness</h2>
 
     <div class="row">
-      <label style="flex:1">Signed State
-        <input id="Signed_State" type="text" placeholder="State">
-      </label>
+         <label style="flex:1">Signed State
+      <select id="Signed_State" name="Signed_State" required>
+        <option value="" disabled selected>-- Select State --</option>
+        <option value="SELANGOR">SELANGOR</option>
+        <option value="K.LUMPUR">K.LUMPUR</option>
+        <option value="MELAKA">MELAKA</option>
+        <option value="N.SEMBILAN">N.SEMBILAN</option>
+        <option value="JOHOR">JOHOR</option>
+        <option value="PENANG">PENANG</option>
+        <option value="PERAK">PERAK</option>
+        <option value="KEDAH">KEDAH</option>
+        <option value="PAHANG">PAHANG</option>
+        <option value="PERLIS">PERLIS</option>
+        <option value="SARAWAK">SARAWAK</option>
+        <option value="SABAH">SABAH</option>
+        <option value="TERENGGANU">T'GANU</option>
+        <option value="KELANTAN">KELANTAN</option>
+      </select>
+    </label>
       <label>Day
         <select id="Signed_Day"><option value="">Day</option></select>
       </label>
