@@ -105,36 +105,36 @@
 
       <label style="min-width:140px; display: flex; align-items: center; gap: 6px;">
   Card Expiry Date:
-  <select id="CC_MM" style="width: 90px;">
-    <option value="" disabled selected>Choose Month</option>
-    <option value="JANUARY">JANUARY</option>
-    <option value="02">02</option>
-    <option value="03">03</option>
-    <option value="04">04</option>
-    <option value="05">05</option>
-    <option value="06">06</option>
-    <option value="07">07</option>
-    <option value="08">08</option>
-    <option value="09">09</option>
-    <option value="10">10</option>
-    <option value="11">11</option>
-    <option value="12">12</option>
-  </select>
+  <select id="CC_MM" style="width: 120px;">
+  <option value="" disabled selected>Choose month</option>
+  <option value="JANUARY">JANUARY</option>
+  <option value="FEBRUARY">FEBRUARY</option>
+  <option value="MARCH">MARCH</option>
+  <option value="APRIL">APRIL</option>
+  <option value="MAY">MAY</option>
+  <option value="JUNE">JUNE</option>
+  <option value="JULY">JULY</option>
+  <option value="AUGUST">AUGUST</option>
+  <option value="SEPTEMBER">SEPTEMBER</option>
+  <option value="OCTOBER">OCTOBER</option>
+  <option value="NOVEMBER">NOVEMBER</option>
+  <option value="DECEMBER">DECEMBER</option>
+</select>
   <span>/</span>
-  <select id="CC_YY" style="width: 90px;">
-    <option value="">YY</option>
-    <option value="24">24</option>
-    <option value="25">25</option>
-    <option value="26">26</option>
-    <option value="27">27</option>
-    <option value="28">28</option>
-    <option value="29">29</option>
-    <option value="30">30</option>
-    <option value="31">31</option>
-    <option value="32">32</option>
-    <option value="33">33</option>
-    <option value="34">34</option>
-  </select>
+<select id="CC_YY" style="width: 100px;">
+  <option value="" disabled selected>Choose year</option>
+  <option value="2024">2024</option>
+  <option value="2025">2025</option>
+  <option value="2026">2026</option>
+  <option value="2027">2027</option>
+  <option value="2028">2028</option>
+  <option value="2029">2029</option>
+  <option value="2030">2030</option>
+  <option value="2031">2031</option>
+  <option value="2032">2032</option>
+  <option value="2033">2033</option>
+  <option value="2034">2034</option>
+</select>
 </label>
     </div>
 
@@ -369,9 +369,10 @@ ccDigits.forEach((el, idx)=>{
     for(let i=0;i<4;i++){ if(ccDigits[i].value.length<4){ ccDigits[i].focus(); break; } if(i===3) ccDigits[3].focus(); }
   });
 });
-const ccMM = $("CC_MM"), ccYY = $("CC_YY");
-ccMM.addEventListener("input", ()=>{ ccMM.value = ccMM.value.replace(/\D/g,'').slice(0,2); if(ccMM.value.length===2) ccYY.focus(); });
-ccYY.addEventListener("input", ()=>{ ccYY.value = ccYY.value.replace(/\D/g,'').slice(0,2); });
+const mm = $("CC_MM").value;  // e.g. "JANUARY"
+const yy = $("CC_YY").value;  // e.g. "2026"
+const expiry = (mm && yy) ? `${mm} ${yy}` : "";
+safeSetText(form, "CC_Expirydate", expiry);
 
 /* ---------- Signature modal (shared) ---------- */
 const sigModal = $("sigModal"), sigCanvas = $("sigCanvas"), sigModalContent = $("sigModalContent");
