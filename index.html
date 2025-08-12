@@ -284,10 +284,40 @@ function safeCheck(form, name, checked){
   try{ const cb = form.getCheckBox(name); if (checked) cb.check(); else cb.uncheck(); } catch(e){}
 }
 
-/* ---------- Policies dynamic (unchanged) ---------- */
+/* ---------- Policies dynamic (updated) ---------- */
 const policiesContainer = $("policiesContainer");
 const addPolicyBtn = $("addPolicy");
 let policyCount = 0;
+
+function setupPolicyOwnerCheckbox(ownerInput, cardholderNameInput, checkbox) {
+  checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+      ownerInput.value = cardholderNameInput.value.toUpperCase();
+    } else {
+      ownerInput.value = '';
+    }
+    // save the value after change
+    localStorage.setItem(ownerInput.id, ownerInput.value);
+    localStorage.setItem(checkbox.id, checkbox.checked);
+    showSaveStatus();
+  });
+
+  // Also listen for changes on the cardholder name and update if checked
+  cardholderNameInput.addEventListener('input', () => {
+    if (checkbox.checked) {
+      ownerInput.value = cardholderNameInput.value.toUpperCase();
+      localStorage.setItem(ownerInput.id, ownerInput.value);
+      showSaveStatus();
+    }
+  });
+
+  // Restore the checkbox state on load
+  const savedCheckboxState = localStorage.getItem(checkbox.id);
+  if (savedCheckboxState === 'true') {
+    checkbox.checked = true;
+    ownerInput.value = cardholderNameInput.value.toUpperCase();
+  }
+}
 
 function createPolicyEntry(index){
   const wrap = document.createElement("div");
@@ -298,6 +328,17 @@ function createPolicyEntry(index){
   const pNoLabel = document.createElement("label"); pNoLabel.textContent = "Policy No.";
   const pNoInput = document.createElement("input"); pNoInput.type="text"; pNoInput.id=`Paymentfor_PolicyNo${index}`; pNoInput.placeholder=`Paymentfor_PolicyNo${index}`;
   pNoLabel.appendChild(pNoInput); wrap.appendChild(pNoLabel);
+  
+  // New checkbox
+  const sameOwnerRow = document.createElement("div"); sameOwnerRow.className = "row";
+  const sameOwnerLabel = document.createElement("label"); sameOwnerLabel.className = "inline";
+  const sameOwnerCheckbox = document.createElement("input");
+  sameOwnerCheckbox.type = "checkbox";
+  sameOwnerCheckbox.id = `sameAsCardholder_${index}`;
+  sameOwnerLabel.appendChild(sameOwnerCheckbox);
+  sameOwnerLabel.appendChild(document.createTextNode(" Same as Cardholder"));
+  sameOwnerRow.appendChild(sameOwnerLabel);
+  wrap.appendChild(sameOwnerRow);
 
   const ownerLabel = document.createElement("label"); ownerLabel.textContent = "Owner Name";
   const ownerInput = document.createElement("input"); ownerInput.type="text"; ownerInput.id=`Paymentfor_PolicyNo${index}_OwnerName`; ownerInput.placeholder=`Paymentfor_PolicyNo${index}_OwnerName`;
@@ -316,9 +357,26 @@ function createPolicyEntry(index){
 
   if(index>1){
     const rem=document.createElement("button"); rem.type="button"; rem.className="secondary"; rem.textContent="Remove"; rem.style.marginTop="8px";
-    rem.addEventListener("click", ()=>{ wrap.remove(); policyCount--; addPolicyBtn.disabled=false; reorganizePolicyIndices(); });
+    rem.addEventListener("click", ()=>{
+      localStorage.removeItem(`sameAsCardholder_${index}`);
+      localStorage.removeItem(`Paymentfor_PolicyNo${index}`);
+      localStorage.removeItem(`Paymentfor_PolicyNo${index}_OwnerName`);
+      localStorage.removeItem(`Paymentfor_PolicyNo${index}_Relationship`);
+      localStorage.removeItem(`Paymentfor_PolicyNo${index}_FirstPremium`);
+      wrap.remove(); policyCount--; addPolicyBtn.disabled=false; reorganizePolicyIndices();
+      showSaveStatus();
+    });
     wrap.appendChild(rem);
   }
+
+  // Set up the capitalization and checkbox logic
+  const cardholderNameInput = $("Cardholder_Name");
+  setupPolicyOwnerCheckbox(ownerInput, cardholderNameInput, sameOwnerCheckbox);
+  ownerInput.addEventListener("input", (e) => {
+    e.target.value = e.target.value.toUpperCase();
+    debounceSave(() => saveElValue(e.target), 120)();
+  });
+
   return wrap;
 }
 function addPolicy(){ if(policyCount>=MAX_POLICIES) return; policyCount++; policiesContainer.appendChild(createPolicyEntry(policyCount)); if(policyCount>=MAX_POLICIES) addPolicyBtn.disabled=true; }
@@ -326,11 +384,20 @@ function reorganizePolicyIndices(){
   const nodes = Array.from(policiesContainer.querySelectorAll(".policy"));
   policyCount = nodes.length;
   nodes.forEach((n, idx)=> {
-    const newIdx = idx+1; n.dataset.index=newIdx; n.querySelector("h3").textContent=`Policy ${newIdx}`;
-    const pNo = n.querySelector(`[id^="Paymentfor_PolicyNo"]`); if(pNo){ pNo.id=`Paymentfor_PolicyNo${newIdx}`; pNo.placeholder=`Paymentfor_PolicyNo${newIdx}`;}
-    const owner = n.querySelector(`[id^="Paymentfor_PolicyNo"][id$="_OwnerName"]`); if(owner){ owner.id=`Paymentfor_PolicyNo${newIdx}_OwnerName`; owner.placeholder=`Paymentfor_PolicyNo${newIdx}_OwnerName`;}
-    const rel = n.querySelector("select"); if(rel) rel.id=`Paymentfor_PolicyNo${newIdx}_Relationship`;
-    const prem = n.querySelector(`[id^="Paymentfor_PolicyNo"][id$="_FirstPremium"]`); if(prem){ prem.id=`Paymentfor_PolicyNo${newIdx}_FirstPremium`; prem.placeholder=`Paymentfor_PolicyNo${newIdx}_FirstPremium`;}
+    const oldIdx = n.dataset.index;
+    const newIdx = idx+1;
+    n.dataset.index=newIdx; n.querySelector("h3").textContent=`Policy ${newIdx}`;
+    
+    // Update all IDs and re-wire listeners
+    const pNo = n.querySelector(`#Paymentfor_PolicyNo${oldIdx}`); if(pNo){ pNo.id=`Paymentfor_PolicyNo${newIdx}`; pNo.placeholder=`Paymentfor_PolicyNo${newIdx}`;}
+    const owner = n.querySelector(`#Paymentfor_PolicyNo${oldIdx}_OwnerName`); if(owner){ owner.id=`Paymentfor_PolicyNo${newIdx}_OwnerName`; owner.placeholder=`Paymentfor_PolicyNo${newIdx}_OwnerName`;}
+    const rel = n.querySelector(`#Paymentfor_PolicyNo${oldIdx}_Relationship`); if(rel){ rel.id=`Paymentfor_PolicyNo${newIdx}_Relationship`;}
+    const prem = n.querySelector(`#Paymentfor_PolicyNo${oldIdx}_FirstPremium`); if(prem){ prem.id=`Paymentfor_PolicyNo${newIdx}_FirstPremium`; prem.placeholder=`Paymentfor_PolicyNo${newIdx}_FirstPremium`;}
+    const checkbox = n.querySelector(`#sameAsCardholder_${oldIdx}`);
+    if(checkbox) {
+        checkbox.id = `sameAsCardholder_${newIdx}`;
+        setupPolicyOwnerCheckbox(owner, $("Cardholder_Name"), checkbox);
+    }
   });
   addPolicyBtn.disabled = policyCount >= MAX_POLICIES;
 }
@@ -452,7 +519,7 @@ restoreSignaturePreviews();
   for(let y=current;y>=current-5;y--) yearSel.innerHTML += `<option>${y}</option>`;
 })();
 
-/* ---------- localStorage autosave + restore ---------- */
+/* ---------- localStorage autosave + restore (updated) ---------- */
 const saveStatusEl = $("saveStatus");
 let saveTimer = null;
 function showSaveStatus(){
@@ -470,7 +537,11 @@ function debounceSave(fn, wait=150){
 /* Save an element's value to localStorage (for inputs & selects) */
 function saveElValue(el){
   if(!el || !el.id) return;
-  localStorage.setItem(el.id, el.value);
+  if(el.type === 'checkbox'){
+      localStorage.setItem(el.id, el.checked);
+  } else {
+      localStorage.setItem(el.id, el.value);
+  }
   showSaveStatus();
 }
 
@@ -478,13 +549,18 @@ function saveElValue(el){
 document.querySelectorAll("input,select,textarea").forEach(el=>{
   // restore
   const saved = localStorage.getItem(el.id);
-  if(saved !== null) el.value = saved;
+  if(saved !== null) {
+    if (el.type === 'checkbox') {
+        el.checked = (saved === 'true');
+    } else {
+        el.value = saved;
+    }
+  }
 
   // attach listener
   el.addEventListener("input", ()=>{
-    // uppercase enforcement for section1 & section5 inputs
-    if( el.closest(".section1") || el.closest(".section5") ){
-      // only uppercase text-like inputs (not numeric-only inputs)
+    // uppercase enforcement for section1, section5, and policy owner name inputs
+    if( el.closest(".section1") || el.closest(".section5") || (el.closest(".policy") && el.id.includes("_OwnerName")) ){
       if(el.type !== "number" && el.inputMode !== "numeric" && el.tagName.toLowerCase() !== 'select'){
         el.value = el.value.toUpperCase();
       }
@@ -492,6 +568,13 @@ document.querySelectorAll("input,select,textarea").forEach(el=>{
     // save debounced
     debounceSave(()=> saveElValue(el), 120)();
   });
+
+  if (el.type === 'checkbox') {
+    el.addEventListener('change', () => {
+      localStorage.setItem(el.id, el.checked);
+      showSaveStatus();
+    });
+  }
 });
 
 /* ---------- Fill PDF ---------- */
@@ -644,8 +727,22 @@ $("resetAll").addEventListener("click", resetAll);
 (function restoreSavedValues(){
   document.querySelectorAll("input,select,textarea").forEach(el=>{
     const saved = localStorage.getItem(el.id);
-    if(saved !== null) el.value = saved;
+    if(saved !== null) {
+      if (el.type === 'checkbox') {
+        el.checked = (saved === 'true');
+      } else {
+        el.value = saved;
+      }
+    }
   });
+  // Restore dynamic policy entries
+  let savedPolicyCount = parseInt(localStorage.getItem('policyCount')) || 1;
+  policiesContainer.innerHTML = "";
+  policyCount = 0;
+  for(let i=1; i<=savedPolicyCount; i++){
+      addPolicy();
+  }
+  
   restoreSignaturePreviews();
 })();
 
