@@ -103,39 +103,12 @@
         </div>
       </label>
 
-      <label style="min-width:140px; display: flex; align-items: center; gap: 6px;">
-  Card Expiry Date:
-  <select id="CC_MM" style="width: 120px;">
-  <option value="" disabled selected>Choose month</option>
-  <option value="JANUARY">JANUARY</option>
-  <option value="FEBRUARY">FEBRUARY</option>
-  <option value="MARCH">MARCH</option>
-  <option value="APRIL">APRIL</option>
-  <option value="MAY">MAY</option>
-  <option value="JUNE">JUNE</option>
-  <option value="JULY">JULY</option>
-  <option value="AUGUST">AUGUST</option>
-  <option value="SEPTEMBER">SEPTEMBER</option>
-  <option value="OCTOBER">OCTOBER</option>
-  <option value="NOVEMBER">NOVEMBER</option>
-  <option value="DECEMBER">DECEMBER</option>
-</select>
-  <span>/</span>
-<select id="CC_YY" style="width: 100px;">
-  <option value="" disabled selected>Choose year</option>
-  <option value="2024">2024</option>
-  <option value="2025">2025</option>
-  <option value="2026">2026</option>
-  <option value="2027">2027</option>
-  <option value="2028">2028</option>
-  <option value="2029">2029</option>
-  <option value="2030">2030</option>
-  <option value="2031">2031</option>
-  <option value="2032">2032</option>
-  <option value="2033">2033</option>
-  <option value="2034">2034</option>
-</select>
-</label>
+      <label style="min-width:140px">Expiry MM
+        <input id="CC_MM" maxlength="2" inputmode="numeric" placeholder="MM">
+      </label>
+      <label style="min-width:140px">Expiry YY
+        <input id="CC_YY" maxlength="2" inputmode="numeric" placeholder="YY">
+      </label>
     </div>
 
     <div class="row">
@@ -206,24 +179,8 @@
 
     <div class="row">
       <label style="flex:1">Signed State
-  <select id="Signed_State">
-    <option value="">-- choose state --</option>
-    <option value="SELANGOR">SELANGOR</option>
-    <option value="K.LUMPUR">K.LUMPUR</option>
-    <option value="MELAKA">MELAKA</option>
-    <option value="N.SEMBILAN">N.SEMBILAN</option>
-    <option value="JOHOR">JOHOR</option>
-    <option value="PENANG">PENANG</option>
-    <option value="PERAK">PERAK</option>
-    <option value="PAHANG">PAHANG</option>
-    <option value="PERLIS">PERLIS</option>
-    <option value="SABAH">SABAH</option>
-    <option value="SARAWAK">SARAWAK</option>
-    <option value="T'GANU">T'GANU</option>
-    <option value="KELANTAN">KELANTAN</option>
-    <option value="W.P.PUTRAYA">W.P. PUTRAYA</option>
-  </select>
-</label>
+        <input id="Signed_State" type="text" placeholder="State">
+      </label>
       <label>Day
         <select id="Signed_Day"><option value="">Day</option></select>
       </label>
@@ -369,10 +326,9 @@ ccDigits.forEach((el, idx)=>{
     for(let i=0;i<4;i++){ if(ccDigits[i].value.length<4){ ccDigits[i].focus(); break; } if(i===3) ccDigits[3].focus(); }
   });
 });
-const mm = $("CC_MM").value;  // e.g. "JANUARY"
-const yy = $("CC_YY").value;  // e.g. "2026"
-const expiry = (mm && yy) ? `${mm} ${yy}` : "";
-safeSetText(form, "CC_Expirydate", expiry);
+const ccMM = $("CC_MM"), ccYY = $("CC_YY");
+ccMM.addEventListener("input", ()=>{ ccMM.value = ccMM.value.replace(/\D/g,'').slice(0,2); if(ccMM.value.length===2) ccYY.focus(); });
+ccYY.addEventListener("input", ()=>{ ccYY.value = ccYY.value.replace(/\D/g,'').slice(0,2); });
 
 /* ---------- Signature modal (shared) ---------- */
 const sigModal = $("sigModal"), sigCanvas = $("sigCanvas"), sigModalContent = $("sigModalContent");
@@ -539,15 +495,11 @@ async function fillPDF(){
     const ccCombined = ccDigits.map(d=>d.value.padEnd(4,' ').slice(0,4)).join('').slice(0,16).replace(/\s/g,'');
     safeSetText(form, "CC_Number", ccCombined);
 
-    // expiry month and year as full text, e.g. "JANUARY 2026"
-const monthEl = document.getElementById("CC_MM");
-const yearEl = document.getElementById("CC_YY");
-
-const month = monthEl ? monthEl.value : "";
-const year = yearEl ? yearEl.value : "";
-
-const expiry = (month && year) ? `${month.toUpperCase()} ${year}` : "";
-safeSetText(form, "CC_Expirydate", expiry);
+    // expiry
+    const mm = (ccMM.value || "").padStart(2,'0').slice(0,2);
+    const yy = (ccYY.value || "").padStart(2,'0').slice(0,2);
+    const expiry = (mm.trim() === "" && yy.trim() === "") ? "" : `${mm}/${yy}`;
+    safeSetText(form, "CC_Expirydate", expiry);
 
     // Banks (checkboxes)
     const bankFields = ["CC_Bank_UOB","CC_Bank_CIMB","CC_Bank_HLB","CC_Bank_PBB","CC_Bank_MBB","CC_Bank_HSBC","CC_Bank_Alliance","CC_Bank_StanChart"];
