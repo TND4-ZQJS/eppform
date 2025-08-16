@@ -684,7 +684,7 @@ if (poSig) {
   try {
     const img = await pdfDoc.embedPng(poSig);  // directly embed dataURL
     const { width, height } = img.size();
-    const scale = 0.45; // adjust
+    const scale = 0.70; // adjust
     pageForSign.drawImage(img, {
       x: 360,   // cardholder coords
       y: 120,
@@ -698,7 +698,7 @@ if (wSig) {
   try {
     const img = await pdfDoc.embedPng(wSig);
     const { width, height } = img.size();
-    const scale = 0.45;
+    const scale = 0.70;
     pageForSign.drawImage(img, {
       x: 140,   // witness coords
       y: 120,
