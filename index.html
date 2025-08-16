@@ -243,9 +243,25 @@
     <div class="row">
       <button id="clearPreviewWitness" class="secondary">Clear Signature</button>
     </div>
-
-    
   </section>
+
+  <div class="sig-controls">
+  <h3>Signature Placement</h3>
+
+  <div class="sig-control">
+    <label>Cardholder X: <input type="number" id="cardholder_x" value="360"></label>
+    <label>Y: <input type="number" id="cardholder_y" value="120"></label>
+    <label>Scale: <input type="number" id="cardholder_scale" value="0.45" step="0.05"></label>
+  </div>
+
+  <div class="sig-control">
+    <label>Witness X: <input type="number" id="witness_x" value="140"></label>
+    <label>Y: <input type="number" id="witness_y" value="120"></label>
+    <label>Scale: <input type="number" id="witness_scale" value="0.45" step="0.05"></label>
+  </div>
+
+  <button id="saveCoords">Save Settings</button>
+</div>
 
   <section class="section actions">
     <button id="generate">Generate PDF</button>
@@ -672,40 +688,48 @@ async function fillPDF(){
     safeSetText(form, "Witness_Name", $("Witness_Name").value || "");
     safeSetText(form, "Witness_NRIC", $("Witness_NRIC").value || "");
 
-    // Embed signatures from localStorage if present
-    const pages = pdfDoc.getPages();
-const pageForSign = pages[Math.min(1, pages.length-1)]; // page 2 or last page
+// Load saved coords or defaults
+function getCoord(id, def){
+  return parseFloat(localStorage.getItem(id) || document.getElementById(id).value || def);
+}
+
+document.getElementById("saveCoords").addEventListener("click", () => {
+  ["cardholder_x","cardholder_y","cardholder_scale",
+   "witness_x","witness_y","witness_scale"].forEach(id=>{
+    localStorage.setItem(id, document.getElementById(id).value);
+  });
+  alert("Signature placement saved!");
+});
+
+// Signature embedding
+const pages = pdfDoc.getPages();
+const pageForSign = pages[Math.min(1, pages.length-1)];
 
 const poSig = localStorage.getItem('cardholder_sig');
 const wSig  = localStorage.getItem('witness_sig');
 
-// Scale and embed
 if (poSig) {
-  try {
-    const img = await pdfDoc.embedPng(poSig);  // directly embed dataURL
-    const { width, height } = img.size();
-    const scale = 0.50; // adjust
-    pageForSign.drawImage(img, {
-      x: 360,   // cardholder coords
-      y: 120,
-      width: width * scale,
-      height: height * scale
-    });
-  } catch (e) { console.warn("Cardholder signature embed failed:", e); }
+  const img = await pdfDoc.embedPng(poSig);
+  const { width, height } = img.size();
+  const scale = getCoord("cardholder_scale", 0.45);
+  pageForSign.drawImage(img, {
+    x: getCoord("cardholder_x", 360),
+    y: getCoord("cardholder_y", 120),
+    width: width * scale,
+    height: height * scale
+  });
 }
 
 if (wSig) {
-  try {
-    const img = await pdfDoc.embedPng(wSig);
-    const { width, height } = img.size();
-    const scale = 0.50;
-    pageForSign.drawImage(img, {
-      x: 140,   // witness coords
-      y: 120,
-      width: width * scale,
-      height: height * scale
-    });
-  } catch (e) { console.warn("Witness signature embed failed:", e); }
+  const img = await pdfDoc.embedPng(wSig);
+  const { width, height } = img.size();
+  const scale = getCoord("witness_scale", 0.45);
+  pageForSign.drawImage(img, {
+    x: getCoord("witness_x", 140),
+    y: getCoord("witness_y", 120),
+    width: width * scale,
+    height: height * scale
+  });
 }
     // Save & download
     const pdfBytes = await pdfDoc.save();
