@@ -674,26 +674,39 @@ async function fillPDF(){
 
     // Embed signatures from localStorage if present
     const pages = pdfDoc.getPages();
-    const pageForSign = pages[Math.min(1, pages.length-1)]; // attempt to place on page 2 or last page
-    const poSig = localStorage.getItem('cardholder_sig');
-    const wSig = localStorage.getItem('witness_sig');
+const pageForSign = pages[Math.min(1, pages.length-1)]; // page 2 or last page
 
-    const sigWidth = 160, sigHeight = 50; // default embed size, adjust if needed
-    if(poSig){
-      try{
-        const pngBytes = await fetch(poSig).then(r=>r.arrayBuffer());
-        const png = await pdfDoc.embedPng(pngBytes);
-        pageForSign.drawImage(png, { x: 360, y: 120, width: sigWidth, height: sigHeight });
-      }catch(e){ console.warn("Cardholder signature embed failed:", e); }
-    }
-    if(wSig){
-      try{
-        const pngBytes2 = await fetch(wSig).then(r=>r.arrayBuffer());
-        const png2 = await pdfDoc.embedPng(pngBytes2);
-        pageForSign.drawImage(png2, { x: 140, y: 120, width: sigWidth, height: sigHeight });
-      }catch(e){ console.warn("Witness signature embed failed:", e); }
-    }
+const poSig = localStorage.getItem('cardholder_sig');
+const wSig  = localStorage.getItem('witness_sig');
 
+// Scale and embed
+if (poSig) {
+  try {
+    const img = await pdfDoc.embedPng(poSig);  // directly embed dataURL
+    const { width, height } = img.size();
+    const scale = 0.45; // adjust
+    pageForSign.drawImage(img, {
+      x: 360,   // cardholder coords
+      y: 120,
+      width: width * scale,
+      height: height * scale
+    });
+  } catch (e) { console.warn("Cardholder signature embed failed:", e); }
+}
+
+if (wSig) {
+  try {
+    const img = await pdfDoc.embedPng(wSig);
+    const { width, height } = img.size();
+    const scale = 0.45;
+    pageForSign.drawImage(img, {
+      x: 140,   // witness coords
+      y: 120,
+      width: width * scale,
+      height: height * scale
+    });
+  } catch (e) { console.warn("Witness signature embed failed:", e); }
+}
     // Save & download
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
