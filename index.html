@@ -688,27 +688,36 @@ async function fillPDF(){
     safeSetText(form, "Witness_Name", $("Witness_Name").value || "");
     safeSetText(form, "Witness_NRIC", $("Witness_NRIC").value || "");
 
-    // Embed signatures from localStorage if present
-    const pages = pdfDoc.getPages();
-    const pageForSign = pages[Math.min(1, pages.length-1)]; // attempt to place on page 2 or last page
-    const poSig = localStorage.getItem('cardholder_sig');
-    const wSig = localStorage.getItem('witness_sig');
+  // Signature embedding
+const pages = pdfDoc.getPages();
+const pageForSign = pages[Math.min(1, pages.length-1)];
 
-    const sigWidth = 160, sigHeight = 50; // default embed size, adjust if needed
-    if(poSig){
-      try{
-        const pngBytes = await fetch(poSig).then(r=>r.arrayBuffer());
-        const png = await pdfDoc.embedPng(pngBytes);
-        pageForSign.drawImage(png, { x: 360, y: 120, width: sigWidth, height: sigHeight });
-      }catch(e){ console.warn("Cardholder signature embed failed:", e); }
-    }
-    if(wSig){
-      try{
-        const pngBytes2 = await fetch(wSig).then(r=>r.arrayBuffer());
-        const png2 = await pdfDoc.embedPng(pngBytes2);
-        pageForSign.drawImage(png2, { x: 140, y: 120, width: sigWidth, height: sigHeight });
-      }catch(e){ console.warn("Witness signature embed failed:", e); }
-    }
+const poSig = localStorage.getItem('cardholder_sig');
+const wSig  = localStorage.getItem('witness_sig');
+
+if (poSig) {
+  const img = await pdfDoc.embedPng(poSig);
+  const { width, height } = img.size();
+  const scale = getCoord("cardholder_scale", 0.45);
+  pageForSign.drawImage(img, {
+    x: getCoord("cardholder_x", 360),
+    y: getCoord("cardholder_y", 120),
+    width: width * scale,
+    height: height * scale
+  });
+}
+
+if (wSig) {
+  const img = await pdfDoc.embedPng(wSig);
+  const { width, height } = img.size();
+  const scale = getCoord("witness_scale", 0.45);
+  pageForSign.drawImage(img, {
+    x: getCoord("witness_x", 140),
+    y: getCoord("witness_y", 120),
+    width: width * scale,
+    height: height * scale
+  });
+}
 
     // Save & download
     const pdfBytes = await pdfDoc.save();
