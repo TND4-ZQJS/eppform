@@ -243,9 +243,25 @@
     <div class="row">
       <button id="clearPreviewWitness" class="secondary">Clear Signature</button>
     </div>
-
-    
   </section>
+
+  <div class="sig-controls">
+  <h3>Signature Placement</h3>
+
+  <div class="sig-control">
+    <label>Cardholder X: <input type="number" id="cardholder_x" value="360"></label>
+    <label>Y: <input type="number" id="cardholder_y" value="120"></label>
+    <label>Scale: <input type="number" id="cardholder_scale" value="0.45" step="0.05"></label>
+  </div>
+
+  <div class="sig-control">
+    <label>Witness X: <input type="number" id="witness_x" value="140"></label>
+    <label>Y: <input type="number" id="witness_y" value="120"></label>
+    <label>Scale: <input type="number" id="witness_scale" value="0.45" step="0.05"></label>
+  </div>
+
+  <button id="saveCoords">Save Settings</button>
+</div>
 
   <section class="section actions">
     <button id="generate">Generate PDF</button>
