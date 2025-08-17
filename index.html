@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Zero Interest EPP — Web Filler (Merged UI)</title>
+<title>Zero Interest EPP Form Filler</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{--bg:#f6f7f9;--card:#fff;--accent:#007aff;--muted:#666;}
   *{box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;margin:18px;background:var(--bg);color:#111}
   main{max-width:980px;margin:0 auto;background:var(--card);padding:18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.06)}
-  h1{margin-top:0;font-size:1.25rem}
+  h1{margin-top:0;font-size:1.50rem}
   .section{background:#fbfbfd;border:1px solid #eee;padding:12px;border-radius:8px;margin:12px 0}
   .section h2{margin:0 0 8px 0}
   label{display:block;margin:8px 0;font-size:0.95rem}
@@ -59,12 +59,12 @@
 </head>
 <body>
 <main>
-  <h1>Zero Interest EPP — Web Filler (Merged UI)</h1>
+  <h1>Zero Interest EPP </h1>
 
   <section class="section section1" id="section1">
     <h2>Section 1 — Cardholder Details</h2>
     <label>Cardholder Name
-      <input id="Cardholder_Name" type="text" placeholder="As printed">
+      <input id="Cardholder_Name" type="text" placeholder="As in NRIC">
     </label>
     <label>Mailing Address Line 1
       <input id="Cardholder_MailingAdd_Line1" type="text">
@@ -86,10 +86,10 @@
   </section>
 
   <section class="section" id="section2">
-    <h2>Section 2 — Bank & Card Type</h2>
+    <h2>Section 2 — Credit Card Details</h2>
 
     <div class="row">
-      <label style="flex:1">Credit Card Number (UI uses 4×4 boxes)
+      <label style="flex:1">Credit Card Number
         <div class="card-number-block">
           <div class="card-number-inputs">
             <input class="card-digit" id="CC_1" maxlength="4" inputmode="numeric" pattern="\d*">
@@ -163,9 +163,9 @@
   </section>
 
   <section class="section" id="section3">
-    <h2>Section 3 — Frequency After EPP</h2>
+    <h2>Section 3 — Frequency After EPP Ended</h2>
     <label>
-      Frequency after EPP ended
+      Payment Frequency after EPP ended
       <select id="AfterEPP_Select">
         <option value="">-- choose frequency --</option>
         <option value="AfterEPP_Annually">Annually</option>
@@ -174,6 +174,7 @@
         <option value="AfterEPP_Monthly">Monthly</option>
       </select>
     </label>
+    <small class="muted tiny">Make sure payment frequency is the same in PI</small>
   </section>
 
   <section class="section" id="section4">
@@ -219,7 +220,7 @@
       </label>
     </div>
 
-    <h3>Cardholder Signature</h3>
+    <h3>Signature of Cardholder</h3>
     <div class="sig-preview" id="preview_cardholder" onclick="openSig('cardholder')">
       <span>Tap to Sign (Cardholder)</span>
     </div>
@@ -236,7 +237,7 @@
       </label>
     </div>
 
-    <h3 style="margin-top:12px">Witness Signature</h3>
+    <h3 style="margin-top:12px">Signature of Witness</h3>
     <div class="sig-preview" id="preview_witness" onclick="openSig('witness')">
       <span>Tap to Sign (Witness)</span>
     </div>
