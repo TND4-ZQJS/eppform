@@ -690,7 +690,7 @@ async function fillPDF(){
       try{
         const pngBytes2 = await fetch(wSig).then(r=>r.arrayBuffer());
         const png2 = await pdfDoc.embedPng(pngBytes2);
-        pageForSign.drawImage(png2, { x: 30, y: 100, width: sigWidth, height: sigHeight });
+        pageForSign.drawImage(png2, { x: 320, y: 99, width: sigWidth, height: sigHeight });
       }catch(e){ console.warn("Witness signature embed failed:", e); }
     }
 
