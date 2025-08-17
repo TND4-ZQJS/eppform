@@ -329,7 +329,7 @@ function createPolicyEntry(index){
   const title = document.createElement("h3"); title.textContent = `Policy ${index}`; wrap.appendChild(title);
 
   const pNoLabel = document.createElement("label"); pNoLabel.textContent = "Policy No.";
-  const pNoInput = document.createElement("input"); pNoInput.type="text"; pNoInput.id=`Paymentfor_PolicyNo${index}`; pNoInput.placeholder=`Paymentfor_PolicyNo${index}`;
+  const pNoInput = document.createElement("input"); pNoInput.type="text"; pNoInput.id=`Paymentfor_PolicyNo${index}`; pNoInput.placeholder=`Enter Policy Number`;
   pNoLabel.appendChild(pNoInput); wrap.appendChild(pNoLabel);
   
   // New checkbox
