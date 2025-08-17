@@ -347,7 +347,7 @@ function createPolicyEntry(index){
   const ownerInput = document.createElement("input"); ownerInput.type="text"; ownerInput.id=`Paymentfor_PolicyNo${index}_OwnerName`; ownerInput.placeholder=`Paymentfor_PolicyNo${index}_OwnerName`;
   ownerLabel.appendChild(ownerInput); wrap.appendChild(ownerLabel);
 
-  const relLabel = document.createElement("label"); relLabel.textContent = "Relationship";
+  const relLabel = document.createElement("label"); relLabel.textContent = "Relationship to Cardholder";
   const relSelect = document.createElement("select"); relSelect.id=`Paymentfor_PolicyNo${index}_Relationship`;
   ["","Ownself","Spouse","Children","Parents","Grandparents","Siblings","Employer/Employee"].forEach(opt=>{
     const o=document.createElement("option"); o.value=opt; o.textContent=opt===""?"-- choose --":opt; relSelect.appendChild(o);
