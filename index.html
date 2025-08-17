@@ -688,35 +688,48 @@ async function fillPDF(){
     safeSetText(form, "Witness_Name", $("Witness_Name").value || "");
     safeSetText(form, "Witness_NRIC", $("Witness_NRIC").value || "");
 
-  // Signature embedding
-const pages = pdfDoc.getPages();
-const pageForSign = pages[Math.min(1, pages.length-1)];
+// ==== CARDHOLDER SIGNATURE Embedding ====
+const sigCardholder = localStorage.getItem("sig_cardholder");
+if (sigCardholder) {
+  try {
+    const imgCardholder = await pdfDoc.embedPng(sigCardholder);
+    const { width, height } = imgCardholder.size();
 
-const poSig = localStorage.getItem('cardholder_sig');
-const wSig  = localStorage.getItem('witness_sig');
+    const scale = 0.18; // 18%
+    const drawW = width * scale;
+    const drawH = height * scale;
 
-if (poSig) {
-  const img = await pdfDoc.embedPng(poSig);
-  const { width, height } = img.size();
-  const scale = getCoord("cardholder_scale", 0.45);
-  pageForSign.drawImage(img, {
-    x: getCoord("cardholder_x", 360),
-    y: getCoord("cardholder_y", 120),
-    width: width * scale,
-    height: height * scale
-  });
+    page.drawImage(imgCardholder, {
+      x: 30,
+      y: 100,
+      width: drawW,
+      height: drawH
+    });
+  } catch (err) {
+    console.error("Error embedding Cardholder signature:", err);
+  }
 }
 
-if (wSig) {
-  const img = await pdfDoc.embedPng(wSig);
-  const { width, height } = img.size();
-  const scale = getCoord("witness_scale", 0.45);
-  pageForSign.drawImage(img, {
-    x: getCoord("witness_x", 140),
-    y: getCoord("witness_y", 120),
-    width: width * scale,
-    height: height * scale
-  });
+// ==== WITNESS SIGNATURE Embbeding ====
+const sigWitness = localStorage.getItem("sig_witness");
+if (sigWitness) {
+  try {
+    const imgWitness = await pdfDoc.embedPng(sigWitness);
+    const { width, height } = imgWitness.size();
+
+    const scale = 0.17; // 17%
+    const drawW = width * scale;
+    const drawH = height * scale;
+
+    page.drawImage(imgWitness, {
+      x: 320,
+      y: 99,
+      width: drawW,
+      height: drawH
+    });
+  } catch (err) {
+    console.error("Error embedding Witness signature:", err);
+  }
 }
 
     // Save & download
