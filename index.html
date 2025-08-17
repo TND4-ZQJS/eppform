@@ -343,7 +343,7 @@ function createPolicyEntry(index){
   sameOwnerRow.appendChild(sameOwnerLabel);
   wrap.appendChild(sameOwnerRow);
 
-  const ownerLabel = document.createElement("label"); ownerLabel.textContent = "Owner Name";
+  const ownerLabel = document.createElement("label"); ownerLabel.textContent = "Name of Policyowner";
   const ownerInput = document.createElement("input"); ownerInput.type="text"; ownerInput.id=`Paymentfor_PolicyNo${index}_OwnerName`; ownerInput.placeholder=`Paymentfor_PolicyNo${index}_OwnerName`;
   ownerLabel.appendChild(ownerInput); wrap.appendChild(ownerLabel);
 
