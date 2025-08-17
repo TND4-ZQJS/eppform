@@ -683,7 +683,7 @@ async function fillPDF(){
       try{
         const pngBytes = await fetch(poSig).then(r=>r.arrayBuffer());
         const png = await pdfDoc.embedPng(pngBytes);
-        pageForSign.drawImage(png, { x: 360, y: 120, width: sigWidth, height: sigHeight });
+        pageForSign.drawImage(png, { x: 30, y: 100, width: sigWidth, height: sigHeight });
       }catch(e){ console.warn("Cardholder signature embed failed:", e); }
     }
     if(wSig){
