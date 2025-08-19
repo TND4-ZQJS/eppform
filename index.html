@@ -695,6 +695,10 @@ async function fillPDF(){
       }catch(e){ console.warn("Witness signature embed failed:", e); }
     }
 
+     
+    // Flatten form fields before saving
+    form.flatten();
+
     // Save & download
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
